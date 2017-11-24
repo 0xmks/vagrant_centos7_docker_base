@@ -1,0 +1,42 @@
+version: '3'
+services:
+  # 1) nginx-reverse-proxy
+  # https://github.com/jwilder/nginx-proxy
+  nginx:
+    build: ./nginx/build/
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  # 2) mysql
+  # https://hub.docker.com/_/mysql/
+  mysql:
+    build: ./mysql/build/
+    ports:
+      - "3306:3306"
+    restart: always
+    hostname: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      TZ: "Asia/Tokyo"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+
+  ## any virtualhosts
+  test01.localhost:
+    build: ./php7-apache/build/
+    volumes:
+      - /vagrant/public_html/test01/:/var/www/html/
+    environment:
+      - VIRTUAL_HOST=test01.localhost
+      - CERT_NAME=shared
+  test02.localhost:
+    build: ./php7-apache/build/
+    volumes:
+      - /vagrant/public_html/test02/:/var/www/html/
+    environment:
+      - VIRTUAL_HOST=test02.localhost
+      - CERT_NAME=shared
+
