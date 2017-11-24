@@ -67,5 +67,12 @@ Vagrant.configure("2") do |config|
       ansible.playbook = "ansible_local/site.yml"
     end
 
+    # Vagrant provision 時に docker-compose buildを実行
+    node.vm.provision "shell", inline: "/usr/local/bin/docker-compose -f /vagrant/docker/docker-compose.yml build"
+
+    # Vagrant up 時に docker-compose up -d を起動
+    node.vm.provision "shell",run: "always", inline: "echo wait 10.sec && sleep 10"
+    node.vm.provision "shell",run: "always", inline: "/usr/local/bin/docker-compose -f /vagrant/docker/docker-compose.yml up -d 1>&2"
+
   end
 end
