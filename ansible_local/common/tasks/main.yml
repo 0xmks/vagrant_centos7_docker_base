@@ -1,0 +1,32 @@
+---
+# selinux 対策
+- name: Install libselinux-python
+  become: true
+  yum:
+    name: libselinux-python
+    state: latest
+
+# epel-relase
+- name: Install epel-release
+  become: true
+  yum:
+    name: epel-release
+    state: latest
+
+# git
+- name: Install git
+  become: true
+  yum:
+    name: git
+    state: latest
+
+# maradb
+- name: Install mariadb package
+  became: true
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - mariadb
+    - mariadb-server
+    - MySQL-python

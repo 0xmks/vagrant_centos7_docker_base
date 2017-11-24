@@ -1,0 +1,87 @@
+---
+# Docker-CE を導入
+# https://docs.docker.com/engine/installation/linux/docker-ce/centos/
+#
+# 不要パッケージ削除
+- name: Docker packages remove
+  became: true
+  yum:
+    name: "{{ item }}"
+    state: removed
+  with_items:
+    - docker
+    - docker-common
+    - docker-selinux
+    - docker-engine
+
+# 必要パッケージ導入
+- name: Docker package install
+  became: true
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+
+# Docker リポジトリ追加
+- name: Docker repo regist
+  became: true
+  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+# Docker-CE 最新版インストール
+- name: Docker-CE install
+  became: true
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - docker-ce
+
+# Docker 起動
+- name: Docker start
+  became: true
+  systemd:
+    name: docker
+    state: started
+
+# Docker 動作テスト
+- name: Docker Hello-World
+  became: true
+  command: docker run hello-world
+
+# Doceker 常時起動
+- name: Docker systemd enable
+  became: true
+  systemd:
+    name: docker
+    enabled: yes
+
+# Docker Composeが導入済みか確認
+- name: Docker-compose alive
+  became: true
+  stat: path="/usr/local/bin/docker-compose"
+  register: dc
+
+# 導入済みならスキップ、なければ docker-compose をインストール
+- name: Docker-compose install
+  became: true
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.17.1/docker-compose-{{ansible_system}}-{{ansible_machine}}"
+    dest: /usr/local/bin/docker-compose
+  register: get_compose
+  when: not dc.stat.exists
+
+# docker-compose に実行権限を付与
+- name: Docker-compose chmod +x
+  file:
+    path: /usr/local/bin/docker-compose
+    mode: "a+x"
+  when: get_compose.changed
+
+# Docker グループへvagrantを追加し vagrantユーザで実行可能にする
+- name: Docker groupt incoming vagrant-user
+  became: true
+  command: usermod -aG docker vagrant
+

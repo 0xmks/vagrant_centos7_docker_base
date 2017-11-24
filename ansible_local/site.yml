@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - role: common
+      tags: common
+    - role: docker-setup
+      tags: docker-setup
+
