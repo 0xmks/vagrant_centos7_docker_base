@@ -61,6 +61,11 @@ Vagrant.configure("2") do |config|
     # /vagrantディレクトリをNFS指定でマウント
     config.vm.synced_folder ".", "/vagrant", type: "nfs"
 
-  end
+    # ansible_local でのセットアップ
+    # https://www.vagrantup.com/docs/provisioning/ansible_local.html
+    node.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "ansible_local/site.yml"
+    end
 
+  end
 end
