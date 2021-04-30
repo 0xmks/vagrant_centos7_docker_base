@@ -1,4 +1,4 @@
-FROM jwilder/nginx-proxy
+FROM jwilder/nginx-proxy:v0.9.0
 
 # 転送サイズ制限設定の調整等
 RUN { \
